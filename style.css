@@ -1,0 +1,40 @@
+:root {
+  color-scheme: dark;
+  font-family: "Cascadia Mono", Consolas, monospace;
+  background: #10171d;
+  color: #e8e5db;
+  --amber: #f0ba75;
+  --muted: #aab4ba;
+  --line: #39444a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+main { width: min(1320px, 94%); margin: clamp(1rem, 5vw, 4rem) auto; }
+header { position: relative; margin-bottom: 1.5rem; padding-right: 6rem; }
+.series { color: var(--amber); font-size: .82rem; letter-spacing: .27em; }
+h1 { font-family: Georgia, serif; font-weight: normal; font-size: clamp(2.5rem, 6vw, 5rem); margin: .12em 0 0; line-height: .98; }
+#restart { position: absolute; right: 0; bottom: 0; }
+.game { display: grid; grid-template-columns: 1.25fr 1fr; border: 1px solid var(--line); background: #19232b; }
+.scene { min-width: 0; }
+#picture { display: block; width: 100%; height: auto; background: #243644; }
+.location, nav, .shortcuts { display: flex; align-items: center; gap: .5rem; padding: .8rem 1rem; }
+.location { justify-content: space-between; flex-wrap: wrap; border-top: 1px solid var(--line); }
+h2 { margin: 0; font-size: 1rem; }
+#exits { color: var(--muted); font-size: .85rem; }
+nav { border-top: 1px solid var(--line); }
+.terminal { min-width: 0; min-height: 25rem; position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--line); background: #131c22; }
+#transcript { flex: 1 1 0; overflow: auto; padding: 1rem 1.15rem; line-height: 1.6; scrollbar-color: #617581 #131c22; }
+#transcript p { margin: 0 0 .85rem; white-space: pre-line; overflow-wrap: anywhere; }
+.echo, label { color: var(--amber); }
+form { display: flex; align-items: center; gap: .75rem; border-top: 1px solid var(--line); padding: .8rem 1rem 0; }
+label { font-size: 1.5rem; }
+input { width: 100%; min-width: 0; background: #10171d; border: 1px solid var(--line); padding: .65em; color: inherit; font: inherit; }
+button { background: #23323c; border: 1px solid #4a5a65; color: inherit; padding: .45em .8em; font: inherit; cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--amber); color: var(--amber); }
+button:disabled { opacity: .45; cursor: default; }
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (max-width: 760px) {
+  .game { grid-template-columns: 1fr; }
+  .terminal { border-left: 0; border-top: 1px solid var(--line); min-height: 22rem; }
+}

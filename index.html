@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Adventure 2027 | The Last Light</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="series">ADVENTURE 2027</div>
+      <h1>The Last Light</h1>
+      <button type="button" id="restart">Restart</button>
+    </header>
+    <section class="game" aria-label="Adventure">
+      <div class="scene">
+        <img id="picture" width="1672" height="941" alt="">
+        <div class="location">
+          <h2 id="room"></h2>
+          <span id="exits"></span>
+        </div>
+        <nav aria-label="Movement">
+          <button data-command="N">N</button>
+          <button data-command="S">S</button>
+          <button data-command="E">E</button>
+          <button data-command="W">W</button>
+        </nav>
+      </div>
+      <div class="terminal">
+        <div id="transcript" role="log" aria-label="Adventure transcript" tabindex="0"></div>
+        <form id="prompt">
+          <label for="command">›<span class="sr-only">Command</span></label>
+          <input id="command" type="text" placeholder="Type a command" autocomplete="off" spellcheck="false">
+          <button type="submit">Enter</button>
+        </form>
+        <div class="shortcuts">
+          <button data-command="LOOK">Look</button>
+          <button data-command="INVENTORY">Inventory</button>
+          <button data-command="HELP">Help</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
