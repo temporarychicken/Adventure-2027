@@ -170,7 +170,7 @@ if (typeof document !== "undefined") {
     const room = rooms[state.room];
     if (picture.dataset.room !== state.room) {
       picture.dataset.room = state.room;
-      picture.src = "art/" + state.room + ".png";
+      picture.src = "art/v2/" + state.room + ".png";
       picture.alt = room.image;
     }
     document.querySelector("#room").textContent = room.name;
