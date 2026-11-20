@@ -1,4 +1,6 @@
-const directions = { N: "north", S: "south", E: "east", W: "west" };
+const directions = { N: "north", S: "south", E: "east", W: "west", U: "up", D: "down" };
+const spacecraftNames = ["ship", "airship", "spacecraft", "meridian"];
+const radioNames = ["radio", "transmitter", "console"];
 
 const rooms = {
   courtyard: {
@@ -23,7 +25,13 @@ const rooms = {
     name: "Lantern Room",
     description: "The great lens is dark. Beneath it, an empty brass socket waits for the pilot flame. The stairs lead south.",
     image: "a lighthouse lens overlooking a boat in rough seas",
-    exits: { S: "watchroom" },
+    exits: { S: "watchroom", U: "helipad" },
+  },
+  helipad: {
+    name: "Rooftop Helipad",
+    description: "An empty landing deck hangs above the sea. A ringed planet fills the break in the clouds. Beside the rail, a brass radio displays MERIDIAN / ORBITAL TENDER / READY TO CALL. The hatch leads down.",
+    image: "an empty lighthouse helipad under a ringed planet",
+    exits: { D: "lantern-room" },
   },
 };
 
@@ -38,7 +46,8 @@ function newGame() {
     room: "courtyard",
     items: Object.fromEntries(Object.entries(items).map(([id, item]) => [id, item.start])),
     unlocked: false,
-    won: false,
+    beaconLit: false,
+    shipArrived: false,
   };
 }
 
@@ -49,10 +58,21 @@ function listItems(state, location) {
 function describe(state) {
   const room = rooms[state.room];
   const visible = listItems(state, state.room);
-  const description = state.room === "lantern-room" && state.won
-    ? "The lens sweeps a beam across the reef. The fishing boat answers with two short blasts. The stairs lead south."
-    : room.description;
+  let description = room.description;
+  if (state.room === "lantern-room" && state.beaconLit) {
+    description = "The lens sweeps a beam across the reef. The fishing boat answers with two short blasts. The stairs lead south. An iron ladder leads up through the open roof hatch.";
+  }
+  if (state.room === "helipad" && state.shipArrived) {
+    description = "The Meridian holds station alongside the deck. Cyan thrusters stir the sea mist beneath its wooden hull, and frost sparkles on its canvas solar sails. The hatch leads down.";
+  }
   return visible.length ? description + "\nYou see: " + visible.join(", ") + "." : description;
+}
+
+function summonShip(state) {
+  if (state.room !== "helipad") return "You'll need a transmitter. Try the rooftop helipad.";
+  if (state.shipArrived) return "The Meridian is already alongside.";
+  state.shipArrived = true;
+  return "The radio crackles. “Meridian descending from low orbit. Keep your landing lights on.”\nA wooden hull breaks through the clouds. Its canvas solar sails furl as cyan thrusters bring it alongside the helipad. The captain raises a hand from the bridge.\nAdventure complete!";
 }
 
 function runCommand(state, input) {
@@ -62,7 +82,8 @@ function runCommand(state, input) {
   if (direction) {
     const destination = rooms[state.room].exits[direction];
     if (!destination) return "You can't go that way.";
-    if (destination === "lantern-room" && !state.unlocked) return "The iron stair gate is locked.";
+    if (state.room === "watchroom" && destination === "lantern-room" && !state.unlocked) return "The iron stair gate is locked.";
+    if (destination === "helipad" && !state.beaconLit) return "The roof hatch is locked. A plate reads: BEACON POWER REQUIRED.";
     state.room = destination;
     return describe(state);
   }
@@ -85,7 +106,7 @@ function runCommand(state, input) {
       return carried.length ? "You carry: " + carried.join(", ") + "." : "You are empty-handed.";
     }
     case "help":
-      return "N, S, E, W · LOOK · GET BOOK · DROP BOOK · INVENTORY\nEXAMINE or READ an object · TALK TO someone · SHOW an object · USE an object";
+      return "N, S, E, W, UP, DOWN · LOOK · GET BOOK · DROP BOOK · INVENTORY\nEXAMINE or READ an object · TALK TO someone · SHOW an object · USE an object\nOn the helipad, try USE RADIO or SUMMON SHIP.";
     case "get":
     case "take":
       if (!target) return "Get what?";
@@ -105,6 +126,12 @@ function runCommand(state, input) {
       if (item && [state.room, "inventory"].includes(state.items[item])) return items[item].detail;
       if (["gate", "stair gate"].includes(noun) && state.room === "watchroom") {
         return state.unlocked ? "The iron gate is open." : "The iron gate has a small keyhole.";
+      }
+      if (state.room === "helipad" && radioNames.includes(noun)) {
+        return state.shipArrived ? "The display reads MERIDIAN / ALONGSIDE." : "A single brass call switch is wired to an orbital frequency. Try USE RADIO.";
+      }
+      if (state.room === "helipad" && state.shipArrived && spacecraftNames.includes(noun)) {
+        return "The Meridian has a clinker-built wooden hull, folding canvas solar sails and a pair of cyan ion thrusters.";
       }
       return "You don't see that here.";
     case "talk":
@@ -128,8 +155,13 @@ function runCommand(state, input) {
     case "unlock":
       if (["gate", "stair gate"].includes(noun)) return runCommand(state, "use key");
       return "Try UNLOCK GATE or USE KEY.";
+    case "summon":
+    case "call":
+      if (spacecraftNames.includes(target) || (verb === "summon" && !target)) return summonShip(state);
+      return "Try SUMMON SHIP.";
     case "use":
       if (!target) return "Use what?";
+      if (state.room === "helipad" && radioNames.includes(noun)) return summonShip(state);
       if (!item || state.items[item] !== "inventory") return "You aren't carrying that.";
       if (item === "key" && state.room === "watchroom") {
         if (state.unlocked) return "The stair gate is already open.";
@@ -137,9 +169,9 @@ function runCommand(state, input) {
         return "The key turns. The iron gate swings open.";
       }
       if (item === "lantern" && state.room === "lantern-room") {
-        if (state.won) return "The beacon is already burning.";
-        state.won = true;
-        return "The pilot flame catches. A bright beam sweeps across the reef, and the boat answers with two short blasts.\nYou saved the boat. Adventure complete!";
+        if (state.beaconLit) return "The beacon is already burning.";
+        state.beaconLit = true;
+        return "The pilot flame catches. A bright beam sweeps across the reef, and the boat answers with two short blasts. You saved the boat.\nAbove you, a relay clicks and the roof hatch opens. A ladder leads UP.";
       }
       return "You find no use for it here.";
     default:
@@ -168,16 +200,22 @@ if (typeof document !== "undefined") {
 
   function renderRoom() {
     const room = rooms[state.room];
-    if (picture.dataset.room !== state.room) {
-      picture.dataset.room = state.room;
-      picture.src = "art/v2/" + state.room + ".png";
-      picture.alt = room.image;
+    const shipVisible = state.room === "helipad" && state.shipArrived;
+    const artwork = state.room === "helipad"
+      ? "art/v3/" + (shipVisible ? "meridian" : "helipad") + ".png"
+      : "art/v2/" + state.room + ".png";
+    if (picture.getAttribute("src") !== artwork) {
+      picture.src = artwork;
+      picture.alt = shipVisible ? "a wooden spacecraft with cyan thrusters alongside the helipad" : room.image;
     }
+    const exits = Object.keys(room.exits).filter(direction => direction !== "U" || state.beaconLit);
     document.querySelector("#room").textContent = room.name;
-    document.querySelector("#exits").textContent = "Exits: " + Object.keys(room.exits).join(" · ");
+    document.querySelector("#exits").textContent = "Exits: " + exits.map(direction => ["U", "D"].includes(direction)
+      ? directions[direction].toUpperCase()
+      : direction).join(" · ");
     for (const button of buttons) {
       const command = button.dataset.command;
-      if (command in directions) button.disabled = !room.exits[command];
+      if (command in directions) button.disabled = !exits.includes(command);
     }
   }
 

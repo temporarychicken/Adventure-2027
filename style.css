@@ -21,7 +21,7 @@ h1 { font-family: Georgia, serif; font-weight: normal; font-size: clamp(2.5rem, 
 .location { justify-content: space-between; flex-wrap: wrap; border-top: 1px solid var(--line); }
 h2 { margin: 0; font-size: 1rem; }
 #exits { color: var(--muted); font-size: .85rem; }
-nav { border-top: 1px solid var(--line); }
+nav { border-top: 1px solid var(--line); flex-wrap: wrap; }
 .terminal { min-width: 0; min-height: 25rem; position: relative; display: flex; flex-direction: column; border-left: 1px solid var(--line); background: #131c22; }
 #transcript { flex: 1 1 0; overflow: auto; padding: 1rem 1.15rem; line-height: 1.6; scrollbar-color: #617581 #131c22; }
 #transcript p { margin: 0 0 .85rem; white-space: pre-line; overflow-wrap: anywhere; }
