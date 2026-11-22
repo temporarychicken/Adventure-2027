@@ -3,15 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Adventure 2027 V3 | The Last Light</title>
+  <title>Adventure 2027 V4 | The Last Light</title>
   <link rel="stylesheet" href="style.css">
   <script src="game.js" defer></script>
 </head>
 <body>
   <main>
     <header>
-      <div class="series">ADVENTURE 2027 · V3</div>
-      <h1>The Last Light</h1>
+      <div>
+        <div class="series">ADVENTURE 2027 · V4</div>
+        <h1>The Last Light</h1>
+      </div>
       <button type="button" id="restart">Restart</button>
     </header>
     <section class="game" aria-label="Adventure">
@@ -31,6 +33,16 @@
         </nav>
       </div>
       <div class="terminal">
+        <div class="cast" role="group" aria-label="Main characters">
+          <div class="character">
+            <img src="art/v3/rowan.png" width="56" height="56" alt="">
+            <div><strong>Rowan</strong><span>You · Lighthouse keeper</span></div>
+          </div>
+          <div class="character">
+            <img src="art/v3/ellis.png" width="56" height="56" alt="">
+            <div><strong>Ellis</strong><span>Companion · Orbital pilot</span></div>
+          </div>
+        </div>
         <div id="transcript" role="log" aria-label="Adventure transcript" tabindex="0"></div>
         <form id="prompt">
           <label for="command">›<span class="sr-only">Command</span></label>

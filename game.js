@@ -4,27 +4,30 @@ const radioNames = ["radio", "transmitter", "console"];
 
 const rooms = {
   courtyard: {
-    name: "Lighthouse Courtyard",
-    description: "Rain sweeps across the flagstones. The lighthouse door stands north, and the keeper's cottage is east. Out on the reef, a fishing boat sounds its horn.",
-    image: "lighthouse and cottage across a stormy flagstone courtyard",
+    name: "Lighthouse Quayside",
+    description: "Rain sweeps across the flagstones. A fishing boat sounds its horn out on the reef. The lighthouse door stands north, and the keeper's cottage is east.",
+    image: "the lighthouse and keeper's cottage across the stormy quayside",
     exits: { N: "watchroom", E: "cottage" },
   },
   cottage: {
     name: "Keeper's Cottage",
-    description: "A fire spits in the grate. Mrs Vale watches the darkening water from her chair. The courtyard lies west.",
-    image: "a woman by the hearth in the keeper's cottage",
+    description: "A fire spits in the grate. Mrs Vale looks up from her chair as the marine radio crackles. The courtyard lies west.",
+    image: "Mrs Vale in a rust cardigan by the hearth in the keeper's cottage",
+    artwork: "art/v3/cottage.png",
     exits: { W: "courtyard" },
   },
   watchroom: {
     name: "Watchroom",
-    description: "The walls tick with cooling pipes. Ellis, an old sailor, stands by the stairs. The lantern room is north, and the courtyard is south.",
-    image: "a sailor next to iron stairs inside the lighthouse",
+    description: "The walls tick with cooling pipes. Ellis wipes his glasses and checks the iron stair gate. The lantern room is north, and the courtyard is south.",
+    image: "Rowan and Ellis beside the watchroom map table and iron stair gate",
+    artwork: "art/v3/watchroom.png",
     exits: { N: "lantern-room", S: "courtyard" },
   },
   "lantern-room": {
     name: "Lantern Room",
-    description: "The great lens is dark. Beneath it, an empty brass socket waits for the pilot flame. The stairs lead south.",
-    image: "a lighthouse lens overlooking a boat in rough seas",
+    description: "The great lens is dark. Mateo Vega, the lighthouse engineer, looks up from a relay with a spanner in his hand. Beneath the lens, an empty brass socket waits for the pilot flame. The stairs lead south.",
+    image: "engineer Mateo Vega in canvas coveralls beside the lighthouse lens",
+    artwork: "art/v3/lantern-room.png",
     exits: { S: "watchroom", U: "helipad" },
   },
   helipad: {
@@ -60,10 +63,10 @@ function describe(state) {
   const visible = listItems(state, state.room);
   let description = room.description;
   if (state.room === "lantern-room" && state.beaconLit) {
-    description = "The lens sweeps a beam across the reef. The fishing boat answers with two short blasts. The stairs lead south. An iron ladder leads up through the open roof hatch.";
+    description = "The lens sweeps a beam across the reef. The fishing boat answers with two short blasts. Mateo watches the relay hold steady. The stairs lead south. An iron ladder leads up through the open roof hatch.";
   }
   if (state.room === "helipad" && state.shipArrived) {
-    description = "The Meridian holds station alongside the deck. Cyan thrusters stir the sea mist beneath its wooden hull, and frost sparkles on its canvas solar sails. The hatch leads down.";
+    description = "The Meridian holds station alongside the deck. Cyan thrusters stir the sea mist beneath its wooden hull. The captain stands beside the radio in a navy coat with gold braid. The hatch leads down.";
   }
   return visible.length ? description + "\nYou see: " + visible.join(", ") + "." : description;
 }
@@ -72,7 +75,7 @@ function summonShip(state) {
   if (state.room !== "helipad") return "You'll need a transmitter. Try the rooftop helipad.";
   if (state.shipArrived) return "The Meridian is already alongside.";
   state.shipArrived = true;
-  return "The radio crackles. “Meridian descending from low orbit. Keep your landing lights on.”\nA wooden hull breaks through the clouds. Its canvas solar sails furl as cyan thrusters bring it alongside the helipad. The captain raises a hand from the bridge.\nAdventure complete!";
+  return "You key the radio. “Meridian, this is Keeper Rowan. Landing lights are on.”\nThe radio crackles. “Meridian descending from low orbit.”\nA wooden hull breaks through the clouds. Its solar sails furl as cyan thrusters bring it alongside. The captain steps onto the deck and joins you by the radio. “Welcome, Keeper Rowan. Fine work with that beacon.”\nEllis grins. “Fancy taking the long way home, Rowan?”\nAdventure complete!";
 }
 
 function runCommand(state, input) {
@@ -106,7 +109,7 @@ function runCommand(state, input) {
       return carried.length ? "You carry: " + carried.join(", ") + "." : "You are empty-handed.";
     }
     case "help":
-      return "N, S, E, W, UP, DOWN · LOOK · GET BOOK · DROP BOOK · INVENTORY\nEXAMINE or READ an object · TALK TO someone · SHOW an object · USE an object\nOn the helipad, try USE RADIO or SUMMON SHIP.";
+      return "N, S, E, W, UP, DOWN · LOOK · GET BOOK · DROP BOOK · INVENTORY\nEXAMINE or READ an object · TALK TO ELLIS · SHOW an object · USE an object\nOn the helipad, try USE RADIO or SUMMON SHIP.";
     case "get":
     case "take":
       if (!target) return "Get what?";
@@ -135,10 +138,20 @@ function runCommand(state, input) {
       }
       return "You don't see that here.";
     case "talk":
-      if (state.room === "cottage" && (!target || ["vale", "mrs vale"].includes(target))) {
-        return "Mrs Vale says, “If you've come for the key, show me the logbook.”";
+      if (state.room === "lantern-room" && ["mateo", "vega", "mateo vega", "engineer"].includes(target)) {
+        if (state.beaconLit) return "Mateo taps the relay. “I wired the landing lights into the beacon after the Meridian came down blind in fog. Both circuits are live now, Rowan. Go up and use the radio.”";
+        return "Mateo sets down his spanner. “Mateo Vega. I used to keep the Meridian's engines running out of Cádiz. Now I look after this old lens. The storm drowned the pilot flame, but the relay held. Fit that hand lantern into the brass socket and she'll come back to life.”";
       }
-      if (state.room === "watchroom" && (!target || target === "ellis")) {
+      if (state.room === "helipad" && state.shipArrived && target === "captain") {
+        return "The captain straightens his cuffs. “That beam brought us straight down through the storm. A pleasure to meet you, Rowan.”";
+      }
+      if (state.room === "cottage" && (!target || ["vale", "mrs vale"].includes(target))) {
+        return "Mrs Vale turns down the radio. “Is that you, Rowan? If you've come for the key, show me the logbook.”";
+      }
+      if (!target || target === "ellis") {
+        if (state.shipArrived) return "Ellis says, “I flew the Meridian once. They still make the tea dangerously strong.”";
+        if (state.room === "helipad") return "Ellis says, “That's the Meridian's call sign, Rowan. Use the radio. I'll talk her in.”";
+        if (state.beaconLit) return "Ellis says, “Good work, Rowan. That relay opened the roof hatch. Try going up from the lantern room.”";
         return "Ellis says, “The beacon takes a pilot flame. A hand lantern will do it if you can get upstairs.”";
       }
       return "There's no one here by that name.";
@@ -149,7 +162,7 @@ function runCommand(state, input) {
           (target === noun || / to (?:the )?(mrs )?vale$/.test(target))) {
         if (state.items.key !== "with Vale") return "Mrs Vale says, “I've already given you the key.”";
         state.items.key = "inventory";
-        return "Mrs Vale checks the logbook and presses the stair key into your hand.";
+        return "Mrs Vale checks the logbook and presses the stair key into your hand. “There you are, Rowan. Mind the top step.”";
       }
       return "Nothing comes of it.";
     case "unlock":
@@ -202,11 +215,11 @@ if (typeof document !== "undefined") {
     const room = rooms[state.room];
     const shipVisible = state.room === "helipad" && state.shipArrived;
     const artwork = state.room === "helipad"
-      ? "art/v3/" + (shipVisible ? "meridian" : "helipad") + ".png"
-      : "art/v2/" + state.room + ".png";
+      ? "art/v3/" + (shipVisible ? "meridian-arrival" : "helipad") + ".png"
+      : room.artwork ?? "art/v2/" + state.room + ".png";
     if (picture.getAttribute("src") !== artwork) {
       picture.src = artwork;
-      picture.alt = shipVisible ? "a wooden spacecraft with cyan thrusters alongside the helipad" : room.image;
+      picture.alt = shipVisible ? "the uniformed captain welcomes Rowan by the radio as the Meridian hovers alongside" : room.image;
     }
     const exits = Object.keys(room.exits).filter(direction => direction !== "U" || state.beaconLit);
     document.querySelector("#room").textContent = room.name;
@@ -235,8 +248,9 @@ if (typeof document !== "undefined") {
     historyIndex = 0;
     commandInput.value = "";
     transcript.replaceChildren();
-    print("The beacon has gone dark. Get it burning before the boat reaches the reef. Type HELP for commands.");
+    print("You are Rowan, the lighthouse keeper. Your companion Ellis pulls his coat tight as a horn sounds from the reef.\n“Beacon's out, Rowan. We'd better get it burning.”\nType HELP for commands.");
     print(describe(state));
+    transcript.scrollTop = 0;
     renderRoom();
   }
 
